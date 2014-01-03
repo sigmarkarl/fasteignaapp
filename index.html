@@ -36,6 +36,9 @@
       intel.xdk.device.hideSplashScreen();
     };
     document.addEventListener("intel.xdk.device.ready",onDeviceReady,false);
+    var ifrmload2 = function() {
+        window.alert("eeee");    
+    }
   </script>
   <script src="http://debug-software.intel.com/target/target-script-min.js#VLRPqSye_pHJr_G4_sqpGmA1DFn1R10OIN7tnaTPKCE"></script>
   <script type="application/javascript" src="app_framework/appframework.min.js"></script>
@@ -45,7 +48,7 @@
   <script type="application/javascript" src="sidebar/js/jquery.event.swipe.js"></script>
   <script type="application/javascript" src="sidebar/js/sidebar.js"></script>
   <script type="application/javascript" src="sidebar/js/swipe.js"></script>
-  <script type="application/javascript" src="js/main.js"></script>
+  <script type="application/javascript" src="js/plebb.js"></script>
 </head>
 
 <body id="afui">
@@ -129,11 +132,63 @@
                   </div>
                   <div class="table-thing with-label widget uib_w_9 d-margins" data-uib="app_framework/input">
                     <label class="narrow-control label-inline" style="color:black">Stærð</label>
-                    <input class="wide-control" type="number" value="100" id="size" style="color:black; background-color:white">
+                    <select class="wide-control" id="sqmfrom" style="color:black; background-color:white">
+                      <option>10</option>
+                      <option>20</option>
+                      <option>30</option>
+                      <option>40</option>
+                      <option>50</option>
+                      <option>60</option>
+                      <option>70</option>
+                      <option>80</option>
+                      <option selected>90</option>
+                      <option>100</option>
+                      <option>125</option>
+                      <option>150</option>
+                        <option>175</option>
+                        <option>200</option>
+                        <option>250</option>
+                        <option>300</option>
+                        <option>350</option>
+                        <option>400</option>
+                        <option>450</option>
+                        <option>500</option>
+                        <option>600</option>
+                        <option>700</option>
+                        <option>800</option>
+                        <option>900</option>
+                        <option>1000</option>
+                    </select>
                   </div>
                   <div class="table-thing with-label widget uib_w_10 d-margins" data-uib="app_framework/input">
-                    <label class="narrow-control label-inline" style="color:black">+-</label>
-                    <input class="wide-control" type="number" value="30" id="sizedelta" style="color:black; background-color:white">
+                    <label class="narrow-control label-inline" style="color:black">til</label>
+                    <select class="wide-control" id="sqmto" style="color:black; background-color:white">
+                      <option>10</option>
+                      <option>20</option>
+                      <option>30</option>
+                      <option>40</option>
+                      <option>50</option>
+                      <option>60</option>
+                      <option>70</option>
+                      <option>80</option>
+                      <option>90</option>
+                      <option>100</option>
+                      <option selected>125</option>
+                      <option>150</option>
+                        <option>175</option>
+                        <option>200</option>
+                        <option>250</option>
+                        <option>300</option>
+                        <option>350</option>
+                        <option>400</option>
+                        <option>450</option>
+                        <option>500</option>
+                        <option>600</option>
+                        <option>700</option>
+                        <option>800</option>
+                        <option>900</option>
+                        <option>1000</option>
+                    </select>
                   </div><a class="button widget uib_w_11 d-margins" data-uib="app_framework/button" onclick="searchm3()" data-trigger="sb-togl/uib_w_2">Leita</a>
                   <div class="table-thing with-label widget uib_w_13 d-margins" data-uib="app_framework/select">
                     <label class="narrow-control label-inline" style="color:black">Raða eftir</label>
@@ -161,6 +216,7 @@
     <!-- /upage -->
 
   </div>
+    <iframe id="ifrm" onload="ifrmload()"></iframe>
   <!-- /uwrap -->
 </body>
 
