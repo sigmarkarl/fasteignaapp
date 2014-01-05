@@ -30,6 +30,7 @@ var searchm3 = function () {
     var urlstr2 = urlstr.replace("offset", "offset=" + 0);
     */
     var ifrm = document.getElementById('ifrm');
+    loc = base;
     ifrm.src = base;
     //window.alert('erm');
     //ifrm.load();
@@ -180,7 +181,7 @@ function Ibud(nafn) {
     }
 
     this.getUrlString = function () {
-        return url;
+        return this.url;
     }
     
     this.equals = function (o) {
@@ -188,7 +189,7 @@ function Ibud(nafn) {
     }
 
     this.toString = function () {
-        return nafn + "\t" + verd + "\t" + fastm + "\t" + brunm + "\t" + teg + "\t" + ferm + "\t" + herb + "\t" + dat + "\t" + url;
+        return this.nafn + "\t" + this.verd + "\t" + this.fastm + "\t" + this.brunm + "\t" + this.teg + "\t" + this.ferm + "\t" + this.herb + "\t" + this.dat + "\t" + this.url;
     }
 }
 
@@ -227,7 +228,8 @@ function slebb( ind ) {
 }
 
 var iblist = [];
-var base = "http://www.mbl.is/mm/fasteignir/";//leit.html?offset;svaedi=&tegund=&fermetrar_fra=&fermetrar_til=&herbergi_fra=&herbergi_til=&gata=&lysing=";
+var mbl = "http://www.mbl.is"
+var base = mbl+"/fasteignir/";//leit.html?offset;svaedi=&tegund=&fermetrar_fra=&fermetrar_til=&herbergi_fra=&herbergi_til=&gata=&lysing=";
 var buds = [ "estate-verd", "estate-fasteignamat", "estate-brunabotamat", "estate-teg_eign", "estate-fermetrar", "estate-fjoldi_herb", "estate-sent_dags" ];
 
 function subload( suburlstr, str ) {
@@ -394,12 +396,16 @@ var chk225;
 
 var sqm_from;
 var sqm_to;
-var ibmap = {};
+var ibmap = [];
+
+var loc;
+
 var ifrmload = function() {
     var ifrm = document.getElementById('ifrm');
     var doc = ifrm.contentWindow.document;
-    var loc = ifrm.contentWindow.location.href;
-    if(loc.indexOf("fasteign/") != -1) {
+    //var loc = ifrm.contentWindow.location.href;
+    console.log( "loc " + loc );
+    if(loc && loc.indexOf("fasteign/") != -1) {
         //int i = loc.indexOf("fasteign/");
         //int id = Integer.parseInt( loc.substring(i+9, loc.indexOf('/', i+9) ) );
 
@@ -407,18 +413,23 @@ var ifrmload = function() {
             var ib = ibmap[loc];
             var nl = doc.getElementsByTagName("td");
             var m = 0;
+            console.log("logggggi " + nl.length );
             for( var k = 0; k < nl.length; k++ ) {
                 var td = nl.item(k);
-                if( td.class === "value" ) {
+                console.log("fmddd" + td);
+                if( td.className == "value" ) {
                     if (m == 1) {
-                        var cont = td.textContent.trim().split("[ ]+")[0].replace(".", "");
+                        var cont = td.textContent.trim().split(" ")[0].replace(".", "");
                         try {
-                            ib.setFasteignaMat(parseInt(cont));
+                            console.log("fm");
+                            var fm = parseInt(cont);
+                            console.log("fmset ");
+                            ib.setFasteignaMat(fm);
                         } catch (e) {
                             ib.setFasteignaMat(0);
                         }
                     } else if (m == 2) {
-                        var cont = td.textContent.trim().split("[ ]+")[0].replace(".", "");
+                        var cont = td.textContent.trim().split(" ")[0].replace(".", "");
                         try {
                             ib.setBrunabotaMat(parseInt(cont));
                         } catch (e) {
@@ -429,16 +440,19 @@ var ifrmload = function() {
                     m++;
                 }
             }
-            iblist.add(ib);
+            iblist.push(ib);
             
-            var str = '<li class="widget uib_w_4" data-uib="app_framework/listitem" id="'+iblist.length+'" onclick="launch( \''+ib.url+'\' )"><table><tr><td><img src="'+ib.imgurl+'" /></td><td style="text-align:center"><div><b>'+ibud+'</b><br>Fermetrar: '+ib.ferm+' / Herbergi: '+ib.herb+'<br>Verð: '+ib.verd+'</div></td></tr></table></li>';
+            console.log( ib.imgurl );
+            var str = '<li class="widget uib_w_4" data-uib="app_framework/listitem" id="'+iblist.length+'" onclick="launch( \''+ib.url+'\' )"><table><tr><td><img src="'+ib.imgurl+'" /></td><td style="text-align:center"><div><b>'+ib.nafn+'</b><br>Fermetrar: '+ib.ferm+' / Herbergi: '+ib.herb+'<br>Verð: '+ib.verd+'</div></td></tr></table></li>';
             $('#ulli').append( str );
 
-            if( iblist.length < 50 ) {
+            //console.log( iblist.length + " " + ibmap.length );
+            if( iblist.length < Object.keys(ibmap).length ) {
                 for (var urlstr in ibmap) {
                     var tib = ibmap[urlstr];
-                    if (tib.getFasteignaMat() == -1) {
+                    if (!tib.getFasteignaMat() || tib.getFasteignaMat() == -1) {
                         try {
+                            loc = tib.getUrlString();
                             ifrm.src = tib.getUrlString();
                         } catch (e) {
                             //e.printStackTrace();
@@ -449,7 +463,7 @@ var ifrmload = function() {
                 }
             }
         }
-    } else if (loc.indexOf("leit") == -1) {
+    } else if (loc && loc.indexOf("leit") == -1) {        
         var nl = doc.getElementsByTagName("input");
         for (var i = 0; i < nl.length; i++) {
             var n = nl.item(i);
@@ -496,7 +510,7 @@ var ifrmload = function() {
         sqm_from = doc.getElementById("sqm-from");
         sqm_to = doc.getElementById("sqm-to");
 
-        if (fjolb != null) {
+        if (fjolb) {
             var val = document.getElementById('typecombo').value;
             /*fjolb.setChecked(false);
              einb.setChecked(false);
@@ -512,7 +526,7 @@ var ifrmload = function() {
                 radpar.click();
             }
         }
-        if (chk101 != null) {
+        if (chk101) {
             var val = document.getElementById('wherecombo').value.substring(0, 3);
             if (val == "101") {
                 chk101.click();
@@ -562,44 +576,45 @@ var ifrmload = function() {
                 chk225.click();
             }
         }
-        if (sqm_from != null) {
+        if (sqm_from) {
             //sqm_from.setSelectedIndex( sqmfrom.getSelectionModel().getSelectedIndex() );
             sqm_from.value = document.getElementById('sqmfrom').value;
         }
-        if (sqm_to != null) {
+        if (sqm_to) {
             //sqm_to.setSelectedIndex( sqmto.getSelectionModel().getSelectedIndex() );
             sqm_to.value = document.getElementById('sqmto').value;
         }
-        if (thehie != null) {
+        if (thehie) {
+            loc = "leit";
             thehie.click();
         }
     } else {
+        console.log("logggggi2");
         var div = doc.getElementById("resultlist");
-        if (div !== null) {
+        if (div) {
             var nl = div.childNodes;
             for (var i = 0; i < nl.length; i++) {
                 var n = nl.item(i);
-                if (n.id != null && n.id.indexOf("realestate-result") != -1) {
+                if (n.id && n.id.indexOf("realestate-result") != -1) {
                     var imgurl = "";
                     var url = "";
-                    var nafn = null;
-                    var pnr = null;
+                    var nafn;
+                    var pnr;
                     var verd = -1;
                     var herb = -1;
-                    var tegund = null;
+                    var tegund;
                     var staerd = -1.0;
 
                     var subnl = n.childNodes;
                     for (var k = 0; k < subnl.length; k++) {
                         var subn = subnl.item(k);
-                        if (subn != null) {
-                            console.log("b "+subn);
-                            if (subn instanceof HTMLAnchorElement) {
-                                var ssubnl = subn.childNodes();
+                        if (subn) {
+                            if (subn.nodeName && subn.nodeName == "A") {
+                                var ssubnl = subn.childNodes;
                                 for (var m = 0; m < ssubnl.length; m++) {
                                     var then = ssubnl.item(m);
-                                    if (then != null && then instanceof HTMLImageElement) {
-                                        imgurl = then.attributes.getNamedItem("src").getTextContent();
+                                    if (then.nodeName && then.nodeName == "IMG") {
+                                        imgurl = then.attributes.getNamedItem("src").textContent;
                                         break;
                                     }
                                 }
@@ -607,28 +622,20 @@ var ifrmload = function() {
                                 var ssubnl = subn.childNodes;
                                 for (var m = 0; m < ssubnl.length; m++) {
                                     var then = ssubnl.item(m);
-                                    if (then != null && then.nodeName == "DIV") {
-                                        console.log("looo4");
+                                    if (then && then.nodeName == "DIV") {
                                         var head = then;
                                         var nl2 = head.childNodes;
                                         
-                                        if (head.className != null ) {
-                                            console.log( head.className );
-                                        }
-                                        
-                                        if (head.className != null && head.className.indexOf("head") != -1) {
-                                            console.log("looo3");
+                                        if (head.className && head.className.indexOf("head") != -1) {
                                             for (var m2 = 0; m2 < nl2.length; m2++) {
                                                 var n2 = nl2.item(m2);
-                                                if (n2 != null && n2.nodeName == "A") {
+                                                if (n2 && n2.nodeName == "A") {
                                                     url = n2.attributes.getNamedItem("href").textContent;
                                                     var nl3 = n2.childNodes;
-                                                    console.log("looo2");
                                                     for (var m3 = 0; m3 < nl3.length; m3++) {
                                                         var n3 = nl3.item(m3);
-                                                        if (n3 != null && n3.nodeName[0] == "H") {
-                                                            console.log("looo");
-                                                            if (nafn == null) {
+                                                        if (n3 && n3.nodeName[0] == "H") {
+                                                            if (nafn) {
                                                                 nafn = n3.textContent;
                                                             } else {
                                                                 pnr = n3.textContent;
@@ -637,10 +644,10 @@ var ifrmload = function() {
                                                     }
                                                 }
                                             }
-                                        } else if (head.className != null && head.className.indexOf("properties") != -1) {
+                                        } else if (head.className && head.className.indexOf("properties") != -1) {
                                             for (var m2 = 0; m2 < nl2.length; m2++) {
                                                 var n2 = nl2.item(m2);
-                                                if (n2 != null && n2.nodeName != null && n2.nodeName == "SPAN") {
+                                                if (n2 && n2.nodeName != null && n2.nodeName == "SPAN") {
                                                     var type = n2.textContent;
                                                     if (type.indexOf("Verð") != -1) {
                                                         var spannodes = n2.childNodes;
@@ -648,7 +655,7 @@ var ifrmload = function() {
                                                             var n3 = spannodes.item(m3);
                                                             if (n3.nodeName == "STRONG") {
                                                                 var val = n3.textContent.trim();
-                                                                verd = parseInt(val.split("[ ]+")[0].replace(".", ""));
+                                                                verd = parseInt(val.split(" ")[0].replace(".", ""));
                                                                 break;
                                                             }
                                                         }
@@ -678,7 +685,7 @@ var ifrmload = function() {
                                                             var n3 = spannodes.item(m3);
                                                             if (n3.nodeName == "STRONG") {
                                                                 var val = n3.textContent.trim();
-                                                                staerd = parseFloat(val.split("[ ]+")[0]);
+                                                                staerd = parseFloat(val.split(" ")[0]);
                                                                 break;
                                                             }
                                                         }
@@ -692,13 +699,11 @@ var ifrmload = function() {
                         }
                     }
 
-                    console.log("loggi");
-                    var urlstr = base + url;
+                    var urlstr = mbl + url;
                     if (!(urlstr in ibmap)) {
-                        console.log("url " + urlstr + " " + nafn);
-                        ib = new Ibud(nafn);
+                        var ib = new Ibud(nafn);
                         ib.setUrl(urlstr);
-                        ib.imgurl = base + imgurl;
+                        ib.imgurl = mbl + imgurl;
                         ib.pnr = pnr;
                         ib.setVerd(verd);
                         ib.setTegund(tegund);
@@ -713,9 +718,8 @@ var ifrmload = function() {
                 }
             }
 
-            console.log("erm " + ibmap.length);
             var foundnext = false;
-            nl = doc.getElementsByTagName("a");
+            /*nl = doc.getElementsByTagName("a");
             for (var i = 0; i < nl.length; i++) {
                 var anchor = nl.item(i);
                 if (anchor.textContent.indexOf("Næsta") != -1) {
@@ -724,12 +728,14 @@ var ifrmload = function() {
                     ifrm.src = urlstr;
                     break;
                 }
-            }
+            }*/
 
             if (!foundnext) {
                 for (var urlstr in ibmap) {
-                    tib = ibmap[urlstr];
-                    if (tib.getFasteignaMat() == -1 || tib.getFasteignaMat() == 0) {
+                    var tib = ibmap[urlstr];
+                    if (!tib.getFasteignaMat() || tib.getFasteignaMat() == -1 || tib.getFasteignaMat() == 0) {
+                        loc = tib.getUrlString();
+                        console.log("loading " + loc);
                         ifrm.src = tib.getUrlString();
                         break;
                     }
